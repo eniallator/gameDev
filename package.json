@@ -1,0 +1,27 @@
+{
+  "name": "gamedev",
+  "version": "1.0.0",
+  "description": "First attempt at making a game in JavaScript",
+  "main": "gameEngine.js",
+  "scripts": {
+    "build": "browserify gameEngine.js -o build/bundle.js",
+    "watch": "watchify gameEngine.js -o build/bundle.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eniallator/gameDev.git"
+  },
+  "author": "eniallator",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eniallator/gameDev/issues"
+  },
+  "homepage": "https://github.com/eniallator/gameDev#readme",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "browserify": "^13.0.1",
+    "watchify": "^3.7.0"
+  }
+}
