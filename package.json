@@ -4,8 +4,9 @@
   "description": "First attempt at making a game in JavaScript",
   "main": "gameEngine.js",
   "scripts": {
-    "build": "browserify gameEngine.js -o build/bundle.js",
-    "watch": "watchify gameEngine.js -o build/bundle.js",
+    "babelbuild": "babel src -d build",
+    "build": "browserify src/gameEngine.js --debug -t babelify -o build/bundle.js",
+    "watch": "watchify src/gameEngine.js --debug -v -t babelify -o build/bundle.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,9 +19,11 @@
     "url": "https://github.com/eniallator/gameDev/issues"
   },
   "homepage": "https://github.com/eniallator/gameDev#readme",
-  "dependencies": {
-  },
   "devDependencies": {
+    "babel-cli": "^6.8.0",
+    "babel-preset-es2015": "^6.6.0",
+    "babel-preset-stage-2": "^6.5.0",
+    "babelify": "^7.3.0",
     "browserify": "^13.0.1",
     "watchify": "^3.7.0"
   }
