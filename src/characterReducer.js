@@ -1,3 +1,9 @@
+const radius = 50;
+const movementSpeed = 0.2;
+const jumpPower = -30;
+const gravity = 0.09;
+const drag = 0.97;
+
 const initialState = {
   position : {
     x : 200,
@@ -7,16 +13,89 @@ const initialState = {
     x : 0,
     y : 0
   },
-  radius : 50,
+  radius : radius,
   onGround : false
 };
 
-const movementSpeed = 0.2;
-const jumpPower = -10;
-const gravity = 0.09;
-const drag = 0.97;
+function calculatePosition(oldPosition, velocity, screenDimensions) {
+  const newPosition = {
+    x: oldPosition.x,
+    y: oldPosition.y
+  };
 
-module.exports = function(state) {
+  if (velocity.x > 0 && newPosition.x + velocity.x < (screenDimensions.dx - radius)) {
+    newPosition.x += velocity.x;
+  }
+
+  if (velocity.x < 0 && newPosition.x + velocity.x > (screenDimensions.x + radius)) {
+    newPosition.x += velocity.x;
+  }
+
+  if (velocity.y > 0 && newPosition.y + velocity.y < (screenDimensions.dy - radius)) {
+    newPosition.y += velocity.y;
+  }
+
+  if (newPosition.y + velocity.y > (screenDimensions.y + radius)) {
+    newPosition.y += velocity.y;
+  }
+
+  return newPosition;
+}
+
+function calculateVelocity(playerCircle, keysPressed, screenDimensions) {
+  const {
+    position,
+    velocity,
+    onGround
+  } = playerCircle;
+
+  const newVelocity = {
+    x: velocity.x,
+    y: velocity.y
+  };
+
+  if(keysPressed.w && onGround){
+    newVelocity.y = jumpPower;
+  }
+  if(keysPressed.d){
+    newVelocity.x += movementSpeed;
+  }
+  if(keysPressed.a){
+    newVelocity.x -= movementSpeed;
+  }
+
+  newVelocity.x *= drag;
+  newVelocity.y *= drag;
+  newVelocity.y += gravity;
+
+  if (position.x + newVelocity.x > (screenDimensions.dx - radius)) {
+    newVelocity.x = -1 * newVelocity.x;
+  }
+
+  if (position.x + newVelocity.x < (screenDimensions.x + radius)) {
+    newVelocity.x = -1 * newVelocity.x;
+  }
+
+  if (position.y + newVelocity.y > (screenDimensions.dy - radius)) {
+    newVelocity.y = -1 * newVelocity.y;
+  }
+
+  if (position.y + newVelocity.y < (screenDimensions.y + radius)){
+    newVelocity.y = -1 * newVelocity.y;
+  }
+
+  return newVelocity
+}
+
+function calculateOnGround(position, screenDimensions){
+  if (position.y > (screenDimensions.dy - radius - 1)) {
+    return true;
+  }
+
+  return false;
+}
+
+module.exports = function characterReducer(state) {
   if(state.playerCircle === undefined) {
       return {
         playerCircle: initialState,
@@ -31,66 +110,15 @@ module.exports = function(state) {
      },
      playerCircle
   } = state;
+  const velocity = calculateVelocity(playerCircle, keysPressed, screenDimensions);
 
-  const {
-    position,
-    velocity,
-    radius,
-    onGround
-  } = playerCircle;
-
-  if(keysPressed.w && onGround){
-    velocity.y = jumpPower;
-  }
-  if(keysPressed.d){
-    velocity.x += movementSpeed;
-  }
-  if(keysPressed.a){
-    velocity.x -= movementSpeed;
-  }
-
-  velocity.x *= drag;
-  velocity.y *= drag;
-  velocity.y += gravity;
-
-  if (velocity.x > 0 && position.x + velocity.x < (screenDimensions.dx - radius)) {
-    position.x += velocity.x;
-  } else if (position.x + velocity.x > (screenDimensions.dx - radius)) {
-    velocity.x = -1 * velocity.x;
-  }
-
-  if (velocity.x < 0 && position.x + velocity.x > (screenDimensions.x + radius)) {
-    position.x += velocity.x;
-  } else if (position.x + velocity.x < (screenDimensions.x + radius)) {
-    velocity.x = -1 * velocity.x;
-  }
-
-  if (velocity.y > 0 && position.y + velocity.y < (screenDimensions.dy - radius)) {
-    position.y += velocity.y;
-  } else if (position.y + velocity.y > (screenDimensions.dy - radius)) {
-    velocity.y = -1 * velocity.y;
-  }
-
-  if (position.y + velocity.y > (screenDimensions.y + radius)) {
-    position.y += velocity.y;
-  } else {
-    velocity.y = -1 * velocity.y;
-  }
-
-  if (position.y > (screenDimensions.dy - radius - 1)) {
-    playerCircle.onGround = true;
-  } else {
-    playerCircle.onGround = false;
-  }
-
-  return state;
-  // return {
-  //   playerCircle: {
-  //     position: calculatePosition(playerCircle, screenDimensions),
-  //     velocity: calculateVelocity(playerCircle, screenDimensions),
-  //     onGround: calculateOnGround(playerCircle, screenDimensions)
-  //     ...playerCircle
-  //   }
-  //   ...state
-  // };
+  return {
+    ...state,
+    playerCircle: {
+      ...playerCircle,
+      velocity: velocity,
+      position: calculatePosition(playerCircle.position, velocity, screenDimensions),
+      onGround: calculateOnGround(playerCircle.position, screenDimensions)
+    }
+  };
 };
