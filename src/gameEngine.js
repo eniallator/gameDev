@@ -8,6 +8,9 @@ var smallCirclePosition = {
   y : -50
 };
 
+const characterImage = new Image();
+characterImage.src = "../assets/character_image.png"
+
 let state = {
   keysPressed : {
     w : false,
@@ -26,6 +29,13 @@ let state = {
 
 var score = 0;
 
+function init(){
+
+  renderScore()
+  resizeWindow()
+  tick()
+}
+
 function resizeWindow(){
   canvas.width = canvasDiv.offsetWidth;
   canvas.height = canvasDiv.offsetHeight;
@@ -40,27 +50,27 @@ function tick(){
   const screenDimensions = state.environment.screenDimensions;
   state = characterReducer(state);
   const playerPosition = state.playerCircle.position;
+  const playerRadius = state.playerCircle.radius;
+
   updateScore();
 
   ctx.clearRect(screenDimensions.x,screenDimensions.y,screenDimensions.dx,screenDimensions.dy);
   ctx.beginPath();
-  ctx.arc(playerPosition.x,playerPosition.y,state.playerCircle.radius,0,Math.PI*2,true);
+  ctx.drawImage(characterImage,playerPosition.x-playerRadius,playerPosition.y-playerRadius,playerRadius*2,playerRadius*2);
   ctx.arc(smallCirclePosition.x,smallCirclePosition.y,10,0,Math.PI*2,true);
   ctx.fill();
 
   requestAnimationFrame(tick);
 }
 
-renderScore()
-resizeWindow()
-tick()
-
 function updateScore(){
 
   const xDiff = Math.abs(state.playerCircle.position.x - smallCirclePosition.x);
   const yDiff = Math.abs(state.playerCircle.position.y - smallCirclePosition.y);
 
-  if (Math.sqrt((xDiff^2) + (yDiff^2)) - 10 - state.playerCircle.radius < 0){ // If to catch if the big circle has gotten the small circle
+  debugger;
+
+  if (Math.sqrt(Math.pow(xDiff,2) + Math.pow(yDiff,2)) - 10 - state.playerCircle.radius < 0){ // If to catch if the big circle has gotten the small circle
     score += 1;
 
     smallCirclePosition = {
@@ -108,3 +118,7 @@ window.addEventListener("click",function(event){
   smallCirclePosition.x = event.clientX - 10
   smallCirclePosition.y = event.clientY - 25
 });
+
+characterImage.onload = function (){
+  init()
+}
